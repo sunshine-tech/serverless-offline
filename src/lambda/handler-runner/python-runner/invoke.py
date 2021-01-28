@@ -7,6 +7,7 @@ import json
 import logging
 import sys
 import os
+import os.path
 from time import strftime, time
 from importlib import import_module
 
@@ -73,7 +74,10 @@ if __name__ == '__main__':
     # this is needed because you need to import from where you've executed sls
     sys.path.append('.')
 
-    module = import_module(args.handler_path.replace(os.sep, '.'))
+    # In serverless-offline v6, the passed handler_path is some location under /tmp/, but our code
+    # is not copied to there, we cannot import from that path.
+    module_name = os.path.basename(args.handler_path)
+    module = import_module(module_name)
     handler = getattr(module, args.handler_name)
 
     # Keep a reference to the original stdin so that we can continue to receive
